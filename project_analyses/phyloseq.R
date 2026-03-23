@@ -5,7 +5,7 @@ library(phyloseq)
 library(BiocManager)
 
 #Loading in the stuff
-metadata <- read.delim('depression_metadata_full.txt', row.names = 1)
+metadata <- read.delim("depression_metadata_full.txt", row.names = 1)
 metadata <- metadata |> 
   drop_na(antidepressant_on_off, antidepressant_count, 
           bdi_group, bdi_ii, hiv_status_clean, hcv) |>
@@ -14,7 +14,6 @@ metadata <- metadata |>
   filter(hcv == "NO") |>
   filter(bdi_group != 'minimal') |>
   filter(hiv_status_clean == "HIV+")
-  
 
 metadata$antidepressant_on_off <- as.factor(metadata$antidepressant_on_off)
 
@@ -39,8 +38,3 @@ tax_table <- tax_table(taxa_table)
 ps0 <- phyloseq(otu_table, sample_data, tax_table, tree)
 
 saveRDS(ps0, "my_phyloseq_object.rds")
-
-ps = readRDS("my_phyloseq_object.rds") |>
-  tax_glom("Genus")
-
-#Making the phyloseq
