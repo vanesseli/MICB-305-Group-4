@@ -1,0 +1,71 @@
+library(tidyverse)
+library(phyloseq)
+library(readxl)
+library(vegan)
+library(ggpubr)
+library(microbiome)
+library(BiocManager)
+library(indicspecies)
+library(writexl)
+library(ANCOMBC)
+library(ggVennDiagram)
+
+#data cleaning
+metadata = read.delim('depression_metadata_full.txt', row.names = 1)
+metadata$antidepressant_on_off = as.factor(metadata$antidepressant_on_off)
+
+metadata_clean <- metadata%>%
+  select(antidepressant_on_off, antidepressant_count, bdi_group, bdi_ii, hiv_status_clean, hcv)%>%
+  filter(hcv == "NO")|>
+  filter(hiv_status_clean == "HIV+")
+
+metadata_clean <- metadata_clean%>%
+  filter(!is.na(bdi_group))%>%
+  filter(!is.na(antidepressant_on_off))%>%
+  filter(!is.na(hiv_status_clean))%>%
+  filter(!is.na(hcv))
+
+metadata_clean <- metadata_clean %>%
+  mutate(antidepressant_on_off = recode(as.character(antidepressant_on_off), "0" = "Off","1" = "On"))
+
+metadata_clean <- metadata_clean%>%
+  filter(!is.na(antidepressant_on_off))
+
+View(metadata_clean)
+
+hiv_depressed_antidepressant <- metadata_clean|>
+  filter(hiv_status_clean == 'HIV+')|>
+  filter(hcv == 'NO')|>
+  filter(bdi_group != 'minimal')|>
+  filter(antidepressant_on_off == 'On')
+#78 people in total
+
+hiv_depressed_no_anti <- metadata_clean|>
+  filter(hiv_status_clean == 'HIV+')|>
+  filter(hcv == 'NO')|>
+  filter(bdi_group != 'minimal')|>
+  filter(antidepressant_on_off == 'Off')
+#51 people in total
+
+hiv_depressed_total <- metadata_clean|>
+  filter(hiv_status_clean == 'HIV+')|>
+  filter(hcv == 'NO')|>
+  filter(bdi_group != 'minimal')
+#129 people in total
+#make the phyloseq object using the other script
+
+#rarefaction
+psrare = rarefy_even_depth(ps, sample.size = 20000)
+ps_rare_relab = transform(psrare, 'compositional')
+ps_rare_relab_genus = tax_glom(ps_rare_relab, 'Genus')
+
+#ssubset phyloseq
+on_anti = subset_samples(ps_rare_relab_genus, antidepressant_on_off == 'On')
+off_anti = subset_samples(ps_rare_relab_genus, antidepressant_on_off == 'Off')
+
+#core members
+core_on_anti = core_members(on_anti, detection = 0, prevalence = 0)
+core_off_anti = core_members(off_anti, detection = 0, prevalence = 0)
+
+  #generating the venn diagram!
+ggVennDiagram(list(core_on_anti, core_off_anti), set_size = 5, category.names = c('On', 'Off'))
