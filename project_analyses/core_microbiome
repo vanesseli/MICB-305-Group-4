@@ -47,7 +47,7 @@ hiv_depressed_no_anti <- metadata_clean|>
   filter(antidepressant_on_off == 'Off')
 #51 people in total
 
-hiv_depressed_total <- metadata_clean|>
+metadata_clean <- metadata_clean|>
   filter(hiv_status_clean == 'HIV+')|>
   filter(hcv == 'NO')|>
   filter(bdi_group != 'minimal')
