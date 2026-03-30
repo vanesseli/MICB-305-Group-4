@@ -17,44 +17,44 @@ library(ANCOMBC)
 
 ```{r}
 # Load in data
-metadata = read.delim('../project_analyses/depression_metadata_full.txt', row.names = 1)
-
-metadata$antidepressant_on_off = as.factor(metadata$antidepressant_on_off)
-metadata <- metadata %>%
-  select(Assay.Type, antidepressant_on_off, antidepressant_count, bdi_group, bdi_ii,
-         hiv_status_clean, hcv) %>%
-  mutate(antidepressant_on_off = recode(antidepressant_on_off,
-                                        `0` = "Off", `1` = "On")) %>%
-  filter(!is.na(antidepressant_on_off) & hcv == "NO" &
-           hiv_status_clean == "HIV+" & bdi_group != "minimal" &
-           Assay.Type == "AMPLICON")
-
-taxonomy = read.delim('../project_analyses/taxonomy.tsv', row.names = 1)
-counts = read.delim('../project_analyses/feature-table.txt', skip=1, row.names=1)
-phylotree = read_tree('../project_analyses/tree.nwk')
+# metadata = read.delim('../project_analyses/depression_metadata_full.txt', row.names = 1)
+# 
+# metadata$antidepressant_on_off = as.factor(metadata$antidepressant_on_off)
+# metadata <- metadata %>%
+#   select(Assay.Type, antidepressant_on_off, antidepressant_count, bdi_group, bdi_ii,
+#          hiv_status_clean, hcv) %>%
+#   mutate(antidepressant_on_off = recode(antidepressant_on_off,
+#                                         `0` = "Off", `1` = "On")) %>%
+#   filter(!is.na(antidepressant_on_off) & hcv == "NO" &
+#            hiv_status_clean == "HIV+" & bdi_group != "minimal" &
+#            Assay.Type == "AMPLICON")
+# 
+# taxonomy = read.delim('../project_analyses/taxonomy.tsv', row.names = 1)
+# counts = read.delim('../project_analyses/feature-table.txt', skip=1, row.names=1)
+# phylotree = read_tree('../project_analyses/tree.nwk')
 ```
 
 ```{r}
 # Make phyloseq object
-set.seed(123)
-taxonomy_formatted = taxonomy %>% 
-  separate(col = Taxon, 
-           into = c('Domain','Phylum','Class','Order',
-                    'Family','Genus','Species'),
-           sep=';', fill='right') %>% 
-  select(-Confidence) %>% 
-  as.matrix()
-
-counts_formatted = counts %>% as.matrix()
-
-otu_table <- otu_table(counts_formatted, taxa_are_rows = T)
-
-sample_data <- sample_data(metadata)
-
-tax_table <- tax_table(taxonomy_formatted)
-
-ps <- phyloseq(otu_table, sample_data, tax_table, phylotree)
-ps = readRDS("../project_analyses/phyloseq_taxonomy.rds")
+# set.seed(123)
+# taxonomy_formatted = taxonomy %>% 
+#   separate(col = Taxon, 
+#            into = c('Domain','Phylum','Class','Order',
+#                     'Family','Genus','Species'),
+#            sep=';', fill='right') %>% 
+#   select(-Confidence) %>% 
+#   as.matrix()
+# 
+# counts_formatted = counts %>% as.matrix()
+# 
+# otu_table <- otu_table(counts_formatted, taxa_are_rows = T)
+# 
+# sample_data <- sample_data(metadata)
+# 
+# tax_table <- tax_table(taxonomy_formatted)
+# 
+# ps <- phyloseq(otu_table, sample_data, tax_table, phylotree)
+ps = readRDS("../project_analyses/my_phyloseq_object.rds")
 ```
 
 ```{r}
@@ -88,7 +88,7 @@ p_wunifrac = mds_data %>%
   geom_point(size = 0.5, alpha = 0.5) +
   stat_ellipse() +
   theme_classic(base_size = 18) +
-  scale_color_manual(values = c("Off" = "#6633FF","On"  = "#00FFCC" ))
+  scale_color_manual(values = c("off" = "#6633FF","on"  = "#00FFCC" ))
 p_wunifrac
 
 ggsave("beta_diversity_plots/bdiv_wunifrac_plot.png", plot = p_wunifrac)
@@ -126,7 +126,7 @@ p_bray = mds_data %>%
   geom_point(size = 0.5, alpha = 0.5) +
   stat_ellipse() +
   theme_classic(base_size = 18) +
-  scale_color_manual(values = c("Off" = "#6633FF","On"  = "#00FFCC" ))
+  scale_color_manual(values = c("off" = "#6633FF","on"  = "#00FFCC" ))
 p_bray
 
 ggsave("beta_diversity_plots/bdiv_bray_plot.png", plot = p_bray)
@@ -161,7 +161,7 @@ p_jaccard = mds_data %>%
   geom_point(size = 0.5, alpha = 0.5) +
   stat_ellipse() +
   theme_classic(base_size = 18) +
-  scale_color_manual(values = c("Off" = "#6633FF","On"  = "#00FFCC" ))
+  scale_color_manual(values = c("off" = "#6633FF","on"  = "#00FFCC" ))
 p_jaccard
 
 ggsave("beta_diversity_plots/bdiv_jaccard_plot.png", plot = p_jaccard)
@@ -196,7 +196,7 @@ p_unifrac = mds_data %>%
   geom_point(size = 0.5, alpha = 0.5) +
   stat_ellipse() +
   theme_classic(base_size = 18) +
-  scale_color_manual(values = c("Off" = "#6633FF","On"  = "#00FFCC" ))
+  scale_color_manual(values = c("off" = "#6633FF","on"  = "#00FFCC" ))
 p_unifrac
 
 ggsave("beta_diversity_plots/bdiv_unifrac_plot.png", plot = p_unifrac)
