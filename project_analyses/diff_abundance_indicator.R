@@ -16,6 +16,8 @@ out = ancombc2(data = ps_glom,
 
 statistical_table = out$res
 
+write.csv(statistical_table, "stat_table.csv")
+
 #These are the two identified through Maaslin2
 #non-significant P-value
 notable <- statistical_table |>
