@@ -54,6 +54,7 @@ sample_data <- sample_data(metadata)
 tax_table <- tax_table(taxonomy_formatted)
 
 ps <- phyloseq(otu_table, sample_data, tax_table, phylotree)
+ps = readRDS("../project_analyses/phyloseq_taxonomy.rds")
 ```
 
 ```{r}

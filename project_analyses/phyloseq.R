@@ -5,6 +5,7 @@ library(phyloseq)
 library(BiocManager)
 
 #Loading in the stuff
+set.seed(123)
 metadata <- read.delim("depression_metadata_full.txt", row.names = 1)
 metadata <- metadata |> 
   drop_na(antidepressant_on_off, antidepressant_count, 
