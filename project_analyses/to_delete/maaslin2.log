@@ -1,0 +1,20 @@
+2026-03-29 20:48:43.487209 INFO::Writing function arguments to log file
+2026-03-29 20:48:43.489461 DEBUG::Function arguments
+2026-03-29 20:48:43.490307 DEBUG::Output folder: to_delete
+2026-03-29 20:48:43.49074 DEBUG::Min Abundance: 0.001000
+2026-03-29 20:48:43.491214 DEBUG::Min Prevalence: 0.100000
+2026-03-29 20:48:43.491555 DEBUG::Normalization: TSS
+2026-03-29 20:48:43.49203 DEBUG::Transform: AST
+2026-03-29 20:48:43.492429 DEBUG::Analysis method: LM
+2026-03-29 20:48:43.492783 DEBUG::Max significance: 0.050000
+2026-03-29 20:48:43.493148 DEBUG::Random effects:
+2026-03-29 20:48:43.493621 DEBUG::Fixed effects: antidepressant_on_off
+2026-03-29 20:48:43.494095 DEBUG::Correction method: BH
+2026-03-29 20:48:43.494582 DEBUG::Standardize: TRUE
+2026-03-29 20:48:43.495093 DEBUG::Cores: 1
+2026-03-29 20:48:43.495733 INFO::Verifying options selected are valid
+2026-03-29 20:48:43.496877 INFO::Determining format of input files
+2026-03-29 20:48:43.498655 INFO::Input format is data samples as rows and metadata samples as rows
+2026-03-29 20:48:43.50366 DEBUG::A total of 81 samples were found in both the data and metadata
+2026-03-29 20:48:43.503976 DEBUG::Reordering data/metadata to use same sample ordering
+2026-03-29 20:48:43.536964 INFO::Formula for fixed effects: expr ~  antidepressant_on_off
