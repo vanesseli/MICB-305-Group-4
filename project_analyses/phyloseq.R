@@ -13,7 +13,8 @@ metadata <- metadata |>
                                         `0` = "off", `1` = "on")) |>
   filter(hcv == "NO") |>
   filter(bdi_group != 'minimal') |>
-  filter(hiv_status_clean == "HIV+")
+  filter(hiv_status_clean == "HIV+") |>
+  filter(Assay.Type == "AMPLICON")
 
 metadata$antidepressant_on_off <- as.factor(metadata$antidepressant_on_off)
 

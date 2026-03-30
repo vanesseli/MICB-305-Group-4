@@ -17,7 +17,7 @@ library(ANCOMBC)
 
 ```{r}
 # Load in data
-metadata = read.delim('depression_metadata_full.txt', row.names = 1)
+metadata = read.delim('../project_analyses/depression_metadata_full.txt', row.names = 1)
 
 metadata$antidepressant_on_off = as.factor(metadata$antidepressant_on_off)
 metadata <- metadata %>%
@@ -29,9 +29,9 @@ metadata <- metadata %>%
            hiv_status_clean == "HIV+" & bdi_group != "minimal" &
            Assay.Type == "AMPLICON")
 
-taxonomy = read.delim('taxonomy.tsv', row.names = 1)
-counts = read.delim('feature-table.txt', skip=1, row.names=1)
-phylotree = read_tree('tree.nwk')
+taxonomy = read.delim('../project_analyses/taxonomy.tsv', row.names = 1)
+counts = read.delim('../project_analyses/feature-table.txt', skip=1, row.names=1)
+phylotree = read_tree('../project_analyses/tree.nwk')
 ```
 
 ```{r}
@@ -86,10 +86,11 @@ p_wunifrac = mds_data %>%
   ggplot(aes(MDS1,MDS2,color = antidepressant_on_off)) +
   geom_point(size = 0.5, alpha = 0.5) +
   stat_ellipse() +
-  theme_classic(base_size = 18)
+  theme_classic(base_size = 18) +
+  scale_color_manual(values = c("Off" = "#6633FF","On"  = "#00FFCC" ))
 p_wunifrac
 
-ggsave("/beta_diversity_plots/bdiv_wunifrac_plot.png", plot = p_wunifrac)
+ggsave("beta_diversity_plots/bdiv_wunifrac_plot.png", plot = p_wunifrac)
 ```
 
 ```{r}
@@ -123,10 +124,11 @@ p_bray = mds_data %>%
   ggplot(aes(MDS1,MDS2,color = antidepressant_on_off)) +
   geom_point(size = 0.5, alpha = 0.5) +
   stat_ellipse() +
-  theme_classic(base_size = 18)
+  theme_classic(base_size = 18) +
+  scale_color_manual(values = c("Off" = "#6633FF","On"  = "#00FFCC" ))
 p_bray
 
-ggsave("/beta_diversity_plots/bdiv_bray_plot.png", plot = p_bray)
+ggsave("beta_diversity_plots/bdiv_bray_plot.png", plot = p_bray)
 
 metadata2 = sample_data(psrare) %>% data.frame()
 
@@ -157,10 +159,11 @@ p_jaccard = mds_data %>%
   ggplot(aes(MDS1,MDS2,color = antidepressant_on_off)) +
   geom_point(size = 0.5, alpha = 0.5) +
   stat_ellipse() +
-  theme_classic(base_size = 18)
+  theme_classic(base_size = 18) +
+  scale_color_manual(values = c("Off" = "#6633FF","On"  = "#00FFCC" ))
 p_jaccard
 
-ggsave("/beta_diversity_plots/bdiv_jaccard_plot.png", plot = p_jaccard)
+ggsave("beta_diversity_plots/bdiv_jaccard_plot.png", plot = p_jaccard)
 
 metadata2 = sample_data(psrare) %>% data.frame()
 
@@ -191,10 +194,11 @@ p_unifrac = mds_data %>%
   ggplot(aes(MDS1,MDS2,color = antidepressant_on_off)) +
   geom_point(size = 0.5, alpha = 0.5) +
   stat_ellipse() +
-  theme_classic(base_size = 18)
+  theme_classic(base_size = 18) +
+  scale_color_manual(values = c("Off" = "#6633FF","On"  = "#00FFCC" ))
 p_unifrac
 
-ggsave("/beta_diversity_plots/bdiv_unifrac_plot.png", plot = p_unifrac)
+ggsave("beta_diversity_plots/bdiv_unifrac_plot.png", plot = p_unifrac)
 
 metadata2 = sample_data(psrare) %>% data.frame()
 
