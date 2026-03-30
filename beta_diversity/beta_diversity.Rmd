@@ -88,7 +88,10 @@ p_wunifrac = mds_data %>%
   geom_point(size = 0.5, alpha = 0.5) +
   stat_ellipse() +
   theme_classic(base_size = 18) +
-  scale_color_manual(values = c("off" = "#6633FF","on"  = "#00FFCC" ))
+  scale_color_manual(
+    name = "Antidepressant Use",
+    values = c("off" = "#6633FF", "on" = "#00FFCC"),
+    labels = c("off" = "Off", "on" = "On"))
 p_wunifrac
 
 ggsave("beta_diversity_plots/bdiv_wunifrac_plot.png", plot = p_wunifrac)
@@ -126,7 +129,10 @@ p_bray = mds_data %>%
   geom_point(size = 0.5, alpha = 0.5) +
   stat_ellipse() +
   theme_classic(base_size = 18) +
-  scale_color_manual(values = c("off" = "#6633FF","on"  = "#00FFCC" ))
+  scale_color_manual(
+    name = "Antidepressant Use",
+    values = c("off" = "#6633FF", "on" = "#00FFCC"),
+    labels = c("off" = "Off", "on" = "On"))
 p_bray
 
 ggsave("beta_diversity_plots/bdiv_bray_plot.png", plot = p_bray)
@@ -161,7 +167,10 @@ p_jaccard = mds_data %>%
   geom_point(size = 0.5, alpha = 0.5) +
   stat_ellipse() +
   theme_classic(base_size = 18) +
-  scale_color_manual(values = c("off" = "#6633FF","on"  = "#00FFCC" ))
+  scale_color_manual(
+    name = "Antidepressant Use",
+    values = c("off" = "#6633FF", "on" = "#00FFCC"),
+    labels = c("off" = "Off", "on" = "On"))
 p_jaccard
 
 ggsave("beta_diversity_plots/bdiv_jaccard_plot.png", plot = p_jaccard)
@@ -196,7 +205,10 @@ p_unifrac = mds_data %>%
   geom_point(size = 0.5, alpha = 0.5) +
   stat_ellipse() +
   theme_classic(base_size = 18) +
-  scale_color_manual(values = c("off" = "#6633FF","on"  = "#00FFCC" ))
+  scale_color_manual(
+    name = "Antidepressant Use",
+    values = c("off" = "#6633FF", "on" = "#00FFCC"),
+    labels = c("off" = "Off", "on" = "On"))
 p_unifrac
 
 ggsave("beta_diversity_plots/bdiv_unifrac_plot.png", plot = p_unifrac)

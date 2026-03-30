@@ -15,6 +15,8 @@ out = ancombc2(data = ps_glom,
 
 statistical_table = out$res
 
+write.csv(statistical_table, "stat_table.csv")
+
 #nothing was significant, this plot is empty
 taxa_to_plot = statistical_table |>
   filter(diff_robust_antidepressant_on_offon==T)

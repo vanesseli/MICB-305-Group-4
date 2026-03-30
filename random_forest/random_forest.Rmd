@@ -25,56 +25,24 @@ library(ANCOMBC)
 ```
 
 ```{r}
-# Load in data
-metadata = read.delim('depression_metadata_full.txt', row.names = 1)
-
-metadata$antidepressant_on_off = as.factor(metadata$antidepressant_on_off)
-metadata <- metadata %>%
-  select(antidepressant_on_off, antidepressant_count, bdi_group, bdi_ii,
-         hiv_status_clean, hcv) %>%
-  mutate(antidepressant_on_off = recode(antidepressant_on_off,
-                                        `0` = "Off", `1` = "On")) %>%
-  filter(!is.na(antidepressant_on_off) & hcv == "NO" &
-           hiv_status_clean == "HIV+" & bdi_group != "minimal")
-
-taxonomy = read.delim('taxonomy.tsv', row.names = 1)
-counts = read.delim('feature-table.txt', skip=1, row.names=1)
-phylotree = read_tree('tree.nwk')
-```
-
-```{r}
 # Make phyloseq object
-taxonomy_formatted = taxonomy %>% 
-  separate(col = Taxon, 
-           into = c('Domain','Phylum','Class','Order',
-                    'Family','Genus','Species'),
-           sep=';', fill='right') %>% 
-  select(-Confidence) %>% 
-  as.matrix()
-counts_formatted = counts %>% as.matrix()
-otu_table <- otu_table(counts_formatted, taxa_are_rows = T)
-sample_data <- sample_data(metadata)
-tax_table <- tax_table(taxonomy_formatted)
-ps0 <- phyloseq(otu_table, sample_data, tax_table, phylotree)
-saveRDS(ps0, file = "phyloseq_taxonomy.rds")
-
-ps = readRDS("phyloseq_taxonomy.rds") %>% 
+ps = readRDS("../project_analyses/my_phyloseq_object.rds") %>% 
   tax_glom('Genus')
+
+stat_table = read.csv("../project_analyses/stat_table.csv", row.names=1) %>%
+  filter(diff_antidepressant_on_offon == "TRUE")
 ```
 
 ```{r}
 # CLR transformation
-avg_abundance = taxa_sums(ps)/sum(taxa_sums(ps))
-avg_abundance = sort(avg_abundance, decreasing = T)
-top_10 = avg_abundance[1:10]
-top_10 = names(top_10)
+taxa = stat_table$taxon
 
 ps_clr = ps %>% microbiome::transform('clr')
 ```
 
 ```{r}
 # Filter the taxa to include only the 10 most abundant genera
-ps_filt = prune_taxa(top_10,ps_clr)
+ps_filt = prune_taxa(taxa,ps_clr)
 
 df = psmelt(ps_filt) %>%
   mutate(Sample = str_replace_all(Sample,'-','_'))
@@ -89,16 +57,18 @@ df_transformed = df %>%
 
 df_pivot = df_transformed %>% 
   select(Sample,Genus,Abundance,antidepressant_on_off) %>% 
-  pivot_wider(names_from = Genus, values_from = Abundance)
+  pivot_wider(names_from = Genus, values_from = Abundance,
+              values_fn = mean)
 df_noNA = df_pivot %>% na.omit()
 df_final = df_noNA %>% select(-Sample)
 ```
 
 ```{r}
 # Run RF
-predictors = df_final %>% select(-antidepressant_on_off)
-outcome = df_final %>% pull(antidepressant_on_off) %>% 
-  factor(levels = c('Off','On'))
+predictors = df_final %>%
+  select(-antidepressant_on_off)
+outcome = df_final %>% pull(antidepressant_on_off) %>%
+  factor(levels = c('off','on'))
 
 set.seed(123)
 k = 5
