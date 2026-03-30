@@ -1,0 +1,287 @@
+---
+title: "Final Project""
+output: html_document
+Name: Vanesse Li
+---
+
+```{r libraries, include=FALSE}
+
+library(tidyverse)
+library(phyloseq)
+library(readxl)
+library(vegan)
+library(ggpubr)
+library(microbiome)
+library(indicspecies)
+library(writexl)
+library(ANCOMBC)
+library(dplyr)
+
+```
+
+## Load the data
+
+```{r load_data}
+
+metadata = read.delim('depression_metadata_full.txt', row.names = 1)
+#1415
+
+metadata <- metadata|>
+  filter(Assay.Type == "AMPLICON")
+#1031
+
+metadata_clean <- metadata |>
+  dplyr::mutate(
+    prior_visit_exam_date = stringr::str_replace_all(prior_visit_exam_date, "1", NA_character_))
+
+metadata_clean <- metadata_clean|>
+  filter(is.na(prior_visit_exam_date))
+
+metadata_clean <- metadata_clean|>
+    filter(str_detect(Sample_name, "qiita_sid", negate = TRUE))|>
+  filter(!is.na(Sample_name))
+#637
+
+metadata_clean <- metadata_clean|>
+  filter(str_detect(name_sample, "blank", negate = TRUE))|>
+  filter(!is.na(name_sample))
+#592
+
+metadata_clean <- metadata_clean|>
+  filter(str_detect(extractionkit_lot..exp., "KOLStudy1.0", negate = TRUE))|>
+  filter(!is.na(extractionkit_lot..exp.))
+#573
+
+#checking for duplicates
+any(duplicated(metadata_clean$name_sample))
+metadata_clean$name_sample[duplicated(metadata_clean$name_sample)]
+#6 duplicates
+
+#removed the 6 duplicates
+metadata_clean <- metadata_clean|>
+  distinct(name_sample, .keep_all = TRUE)|>
+  filter(!is.na(name_sample))
+#567
+
+metadata_clean <- metadata_clean|>
+  distinct(Sample.Name, .keep_all = TRUE)|>
+  filter(!is.na(Sample.Name))
+#no duplicates in this column
+
+metadata_clean <- metadata_clean|>
+  distinct(Sample_name, .keep_all = TRUE)|>
+  filter(!is.na(Sample_name))
+#no duplicates in this column
+
+metadata_clean <- metadata_clean|>
+  distinct(orig_name..exp., .keep_all = TRUE)|>
+  filter(!is.na(orig_name..exp.))
+#no duplicates in this column
+
+
+metadata_clean <- metadata_clean|>
+  distinct(BioSample, .keep_all = TRUE)|>
+  filter(!is.na(BioSample))
+#567
+
+metadata_clean <- metadata_clean|>
+  distinct(Experiment, .keep_all = TRUE)|>
+  filter(!is.na(Experiment))
+#567
+
+metadata_clean <- metadata_clean|>
+  distinct(host_subject_id, .keep_all = TRUE)|>
+  filter(!is.na(host_subject_id))
+#402 samples
+
+metadata_clean <- metadata_clean|>  
+  filter(str_detect(host_subject_id, "Sample", negate = TRUE))|>
+    filter(str_detect(host_subject_id, "T0", negate = TRUE))
+#398
+
+```
+
+```         
+```
+
+```{r}
+metadata_clean$antidepressant_on_off = as.factor(metadata_clean$antidepressant_on_off)
+
+metadata_clean <- metadata_clean%>%
+  filter(!is.na(bdi_group))%>%
+  filter(!is.na(antidepressant_on_off))%>%
+  filter(!is.na(hiv_status_clean))%>%
+  filter(!is.na(hcv))
+
+metadata_clean <- metadata_clean %>%
+  mutate(antidepressant_on_off = recode(as.character(antidepressant_on_off), "0" = "Off","1" = "On")) 
+
+metadata_clean <- metadata_clean%>%
+  filter(!is.na(antidepressant_on_off))
+
+metadata_clean_1 <- metadata_clean%>%
+  select(antidepressant_on_off, antidepressant_count, bdi_group, bdi_ii, hiv_status_clean, hcv)%>%
+  filter(hcv == "YES")|>
+  filter(hiv_status_clean == "HIV-")
+
+metadata_clean_3 <- metadata_clean%>%
+  select(antidepressant_on_off, antidepressant_count, bdi_group, bdi_ii, hiv_status_clean, hcv)%>%
+  filter(hcv == "NO")|>
+  filter(hiv_status_clean == "HIV-")
+
+metadata_clean_2 <- metadata_clean%>%
+  select(antidepressant_on_off, antidepressant_count, bdi_group, bdi_ii, hiv_status_clean, hcv)%>%
+  filter(hcv == "NO")|>
+  filter(hiv_status_clean == "HIV+")
+
+metadata_clean_4 <- metadata_clean%>%
+  select(antidepressant_on_off, antidepressant_count, bdi_group, bdi_ii, hiv_status_clean, hcv)%>%
+  filter(hcv == "YES")|>
+  filter(hiv_status_clean == "HIV+")
+
+hiv_depressed_antidepressant <- metadata_clean|>
+  filter(hiv_status_clean == 'HIV+')|>
+  filter(hcv == 'NO')|>
+  filter(bdi_group != 'minimal')|>
+  filter(antidepressant_on_off == 'On')
+#34 people in total
+
+hiv_depressed_no_anti <- metadata_clean|>
+  filter(hiv_status_clean == 'HIV+')|>
+  filter(hcv == 'NO')|>
+  filter(bdi_group != 'minimal')|>
+  filter(antidepressant_on_off == 'Off')
+#23 people in total
+
+total_people <- metadata_clean|>
+  filter(hiv_status_clean == 'HIV+')|>
+  filter(hcv == 'NO')|>
+  filter(bdi_group != 'minimal')
+#129 people in total
+
+```
+
+# PART 2: Core Microbiome
+
+```{r}
+#making the phyloseq
+library(tidyverse)
+library(phyloseq)
+library(BiocManager)
+library(microbiome)
+library(indicspecies)
+
+#Making the phyloseq
+taxonomy = read.delim('taxonomy.tsv', row.names = 1)
+counts = read.delim('feature-table.txt', skip=1, row.names=1)
+tree = read_tree("tree.nwk")
+
+otu_table <- otu_table(counts, taxa_are_rows = TRUE)
+
+sample_data <- sample_data(total_people)
+
+taxa_table <- taxonomy |>
+  separate(col = Taxon, 
+           into = c('Domain','Phylum','Class','Order',
+                    'Family','Genus','Species'),
+           sep=';', fill='right') |> 
+  select(-Confidence)  |>
+  as.matrix()
+
+tax_table <- tax_table(taxa_table)
+
+ps0 <- phyloseq(otu_table, sample_data, tax_table, tree)
+
+saveRDS(ps0, "my_phyloseq_object.rds")
+
+ps = readRDS("my_phyloseq_object.rds") |>
+  tax_glom("Genus")
+
+
+#rarefaction
+set.seed(400)
+psrare = rarefy_even_depth(ps, sample.size = 10000)
+ps_rare_relab = transform(psrare, 'compositional')
+ps_rare_relab_genus = tax_glom(ps_rare_relab, 'Genus')
+
+#ssubset phyloseq
+on_anti = subset_samples(ps_rare_relab_genus, antidepressant_on_off == 'On')
+off_anti = subset_samples(ps_rare_relab_genus, antidepressant_on_off == 'Off')
+
+#core members
+core_on_anti = core_members(on_anti, detection = 0.005, prevalence = 0.3)
+core_off_anti = core_members(off_anti, detection = 0.005, prevalence = 0.3)
+
+library(ggVennDiagram)
+
+ggVennDiagram(list(core_on_anti, core_off_anti), set_size = 5, category.names = c('On', 'Off'))
+```
+
+``` r
+```
+
+```{r}
+#with filter
+#indicator species analysis
+ps_phylum = tax_glom(ps, 'Genus')
+ps_relab = transform(ps_phylum, 'compositional')
+ps_filt = filter_taxa(ps_relab, function(x) mean(x) > 0.001, TRUE) #keep that is true for
+otu_table = data.frame(otu_table(ps_filt))
+
+set.seed(400)
+#indval = multipatt(t(otu_table), cluster = ps_filt@sam_data$antidepressant_on_off, control = how(nperm = 999))
+
+indval = multipatt(t(otu_table), cluster = ps_filt@sam_data$antidepressant_on_off, control = how(nperm = 999))
+
+summary(indval, indvalcomp = TRUE)
+indval_table= as.data.frame(indval$sign)
+
+View(indval_table)
+
+#matching actual names to the codes
+# extract the taxonomy table as a data frame
+tax_info <- as.data.frame(tax_table(ps_filt))
+
+# match the ISA results with the taxonomy names
+indval_table$Genus <- tax_info[rownames(indval_table), "Genus"]
+
+# move Genus to the first column so i can read
+indval_table <- indval_table[, c("Genus", setdiff(names(indval_table), "Genus"))]
+
+#plotting
+phyla_to_plot = indval_table%>%
+  filter(s.Off ==1 & s.On==0)%>%
+  rownames()
+
+df_of_taxa = prune_taxa(phyla_to_plot, ps_filt)%>%
+  psmelt()
+
+library(ggplot2)
+plot_filter <- df_of_taxa%>%
+  ggplot(aes(antidepressant_on_off, Abundance, fill=antidepressant_on_off))+
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(height=0, width=0.2)+
+  facet_wrap(~Genus, ncol=4, scales = 'free')
+
+plot_filter + scale_fill_manual(values = c("Off" = "#6633FF","On"  = "#00FFCC" ))
+
+final_plot <- plot_filter +
+  scale_y_log10()+ scale_fill_manual(values = c("Off" = "#6633FF","On"  = "#00FFCC" )) 
+
+ggsave("final_plot.png", plot = final_plot, width = 10, height = 10, limitsize = FALSE)
+
+```
+
+```{r}
+#no filter
+```
+
+# Notes
+
+```{r}
+
+```
+
+```{r}
+
+```
