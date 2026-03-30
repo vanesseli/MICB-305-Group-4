@@ -33,6 +33,8 @@ indval_table <- indval_table[, c("Genus", setdiff(names(indval_table), "Genus"))
 indval_table = indval_table %>%
   filter(p.value < 0.05)
 
+write.csv(indval_table, "../indval_table.csv")
+
 #plotting
 phyla_to_plot = indval_table%>%
   filter(s.Off ==1 & s.On==0)%>%

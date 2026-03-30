@@ -61,7 +61,7 @@ ps = readRDS("../project_analyses/my_phyloseq_object.rds")
 # Rarify data
 set.seed(123)
 psrare = ps %>%
-  rarefy_even_depth(sample.size = 20000, rngseed = 123)
+  rarefy_even_depth(sample.size = 10000, rngseed = 123)
 ```
 
 ```{r}

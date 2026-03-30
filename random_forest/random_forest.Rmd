@@ -31,6 +31,9 @@ ps = readRDS("../project_analyses/my_phyloseq_object.rds") %>%
 
 stat_table = read.csv("../project_analyses/stat_table.csv", row.names=1) %>%
   filter(diff_antidepressant_on_offOn == "TRUE")
+
+# indicator species
+stat_table = read.csv("../indval_table.csv", row.names = 1)
 ```
 
 ```{r}
@@ -106,5 +109,5 @@ p = ggplot() +
   theme_minimal(base_size=18)
 p
 
-ggsave("random_forest.png", plot = p, width = 8, height = 6)
+ggsave("random_forest_indicator_species.png", plot = p, width = 8, height = 6)
 ```
