@@ -16,16 +16,33 @@ out = ancombc2(data = ps_glom,
 
 statistical_table = out$res
 
+#These are the two identified through Maaslin2
+#non-significant P-value
+notable <- statistical_table |>
+  filter(taxon == 'dc64f4ef4d4f99019072896947b19e4a' | taxon == '4499b0901e611126af0d04752c158976')
+
+#this one is oribacterium (shown to have a strong lfc value)
+tax_table(ps_glom)['dc64f4ef4d4f99019072896947b19e4a', ]
+#this one is lachnospiraceae, a serotype of it I think
+tax_table(ps_glom)['4499b0901e611126af0d04752c158976', ]
+
 #39 are significant if you ignore robust
 taxa_to_plot = statistical_table |>
   filter(diff_antidepressant_on_offon==T)
 
+tax_df <- data.frame(tax_table(ps_glom)) |>
+  rownames_to_column('taxon')
+
+taxa_to_plot <- taxa_to_plot |>
+  left_join(tax_df |> select(taxon, Genus), by = 'taxon') |>
+  mutate(Genus = ifelse(is.na(Genus), taxon, Genus))
+
+#order it from smallest to largest LFC
 taxa_to_plot |>
-  ggplot(aes(taxon,lfc_antidepressant_on_offon)) +
+  mutate(Genus = reorder(Genus, lfc_antidepressant_on_offon)) |>
+  ggplot(aes(x = Genus, y = lfc_antidepressant_on_offon)) +
   geom_col() +
   coord_flip()
-
-
 
 
 
@@ -53,7 +70,7 @@ taxa_to_plot |>
 # 
 # statistical_table = out$results
 # 
-# taxa_to_plot = statistical_table |> 
+# taxa_to_plot = statistical_table |>
 #   filter(qval < 0.05)
 # 
 # #readable genus names ~~~
