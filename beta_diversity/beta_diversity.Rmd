@@ -90,7 +90,7 @@ p_wunifrac = mds_data %>%
   theme_classic(base_size = 18) +
   scale_color_manual(
     name = "Antidepressant Use",
-    values = c("off" = "#6633FF", "on" = "#00FFCC"),
+    values = c("Off" = "#6633FF", "On" = "#00FFCC"),
     labels = c("off" = "Off", "on" = "On"))
 p_wunifrac
 
@@ -131,11 +131,12 @@ p_bray = mds_data %>%
   theme_classic(base_size = 18) +
   scale_color_manual(
     name = "Antidepressant Use",
-    values = c("off" = "#6633FF", "on" = "#00FFCC"),
+    values = c("Off" = "#6633FF", "On" = "#00FFCC"),
     labels = c("off" = "Off", "on" = "On"))
 p_bray
 
-ggsave("beta_diversity_plots/bdiv_bray_plot.png", plot = p_bray)
+ggsave("beta_diversity_plots/bdiv_bray_plot.png", plot = p_bray,
+       width = 8, height = 6)
 
 metadata2 = sample_data(psrare) %>% data.frame()
 
@@ -169,7 +170,7 @@ p_jaccard = mds_data %>%
   theme_classic(base_size = 18) +
   scale_color_manual(
     name = "Antidepressant Use",
-    values = c("off" = "#6633FF", "on" = "#00FFCC"),
+    values = c("Off" = "#6633FF", "On" = "#00FFCC"),
     labels = c("off" = "Off", "on" = "On"))
 p_jaccard
 
@@ -207,7 +208,7 @@ p_unifrac = mds_data %>%
   theme_classic(base_size = 18) +
   scale_color_manual(
     name = "Antidepressant Use",
-    values = c("off" = "#6633FF", "on" = "#00FFCC"),
+    values = c("Off" = "#6633FF", "On" = "#00FFCC"),
     labels = c("off" = "Off", "on" = "On"))
 p_unifrac
 

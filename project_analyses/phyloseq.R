@@ -6,7 +6,7 @@ library(BiocManager)
 
 #Loading in the stuff
 set.seed(123)
-metadata <- read.delim("depression_metadata_full.txt", row.names = 1)
+metadata <- read.csv("metadata_filtered.csv", row.names = 1)
 metadata <- metadata |> 
   drop_na(antidepressant_on_off, antidepressant_count, 
           bdi_group, bdi_ii, hiv_status_clean, hcv) |>

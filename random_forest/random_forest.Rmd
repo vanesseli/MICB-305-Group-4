@@ -68,12 +68,12 @@ df_final = df_noNA %>% select(-Sample)
 predictors = df_final %>%
   select(-antidepressant_on_off)
 outcome = df_final %>% pull(antidepressant_on_off) %>%
-  factor(levels = c('off','on'))
+  factor(levels = c('Off','On'))
 
 set.seed(123)
 k = 5
 folds = createFolds(outcome, k = k, list = TRUE)
-tune_grid = expand.grid(mtry = c(5, 10, 15), 
+tune_grid = expand.grid(mtry = c(5, 10, 15),
                        splitrule = "gini",
                        min.node.size = c(5, 10, 20))
 
@@ -106,5 +106,5 @@ p = ggplot() +
   theme_minimal(base_size=18)
 p
 
-ggsave("random_forest.png", plot = p)
+ggsave("random_forest.png", plot = p, width = 8, height = 6)
 ```
