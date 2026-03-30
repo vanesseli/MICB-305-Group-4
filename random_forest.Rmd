@@ -1,0 +1,140 @@
+---
+title: "random_forest"
+output: html_document
+---
+
+```{r}
+# Load in packages
+library(randomForest)
+library(caret)
+library(ranger)
+library(pROC)
+library(boot)
+library(ggplot2)
+library(phyloseq)
+library(tidyverse)
+
+library(tidyverse)
+library(phyloseq)
+library(vegan)
+library(ggpubr)
+library(microbiome)
+library(indicspecies)
+library(writexl)
+library(ANCOMBC)
+```
+
+```{r}
+# Load in data
+metadata = read.delim('depression_metadata_full.txt', row.names = 1)
+
+metadata$antidepressant_on_off = as.factor(metadata$antidepressant_on_off)
+metadata <- metadata %>%
+  select(antidepressant_on_off, antidepressant_count, bdi_group, bdi_ii,
+         hiv_status_clean, hcv) %>%
+  mutate(antidepressant_on_off = recode(antidepressant_on_off,
+                                        `0` = "Off", `1` = "On")) %>%
+  filter(!is.na(antidepressant_on_off) & hcv == "NO" &
+           hiv_status_clean == "HIV+" & bdi_group != "minimal")
+
+taxonomy = read.delim('taxonomy.tsv', row.names = 1)
+counts = read.delim('feature-table.txt', skip=1, row.names=1)
+phylotree = read_tree('tree.nwk')
+```
+
+```{r}
+# Make phyloseq object
+taxonomy_formatted = taxonomy %>% 
+  separate(col = Taxon, 
+           into = c('Domain','Phylum','Class','Order',
+                    'Family','Genus','Species'),
+           sep=';', fill='right') %>% 
+  select(-Confidence) %>% 
+  as.matrix()
+counts_formatted = counts %>% as.matrix()
+otu_table <- otu_table(counts_formatted, taxa_are_rows = T)
+sample_data <- sample_data(metadata)
+tax_table <- tax_table(taxonomy_formatted)
+ps0 <- phyloseq(otu_table, sample_data, tax_table, phylotree)
+saveRDS(ps0, file = "phyloseq_taxonomy.rds")
+
+ps = readRDS("phyloseq_taxonomy.rds") %>% 
+  tax_glom('Genus')
+```
+
+```{r}
+# CLR transformation
+avg_abundance = taxa_sums(ps)/sum(taxa_sums(ps))
+avg_abundance = sort(avg_abundance, decreasing = T)
+top_10 = avg_abundance[1:10]
+top_10 = names(top_10)
+
+ps_clr = ps %>% microbiome::transform('clr')
+```
+
+```{r}
+# Filter the taxa to include only the 10 most abundant genera
+ps_filt = prune_taxa(top_10,ps_clr)
+
+df = psmelt(ps_filt) %>%
+  mutate(Sample = str_replace_all(Sample,'-','_'))
+```
+
+```{r}
+# Z-transformation
+df_transformed = df %>% 
+  group_by(Genus) %>% 
+  mutate(Abundance = scale(Abundance)) %>% 
+  ungroup()
+
+df_pivot = df_transformed %>% 
+  select(Sample,Genus,Abundance,antidepressant_on_off) %>% 
+  pivot_wider(names_from = Genus, values_from = Abundance)
+df_noNA = df_pivot %>% na.omit()
+df_final = df_noNA %>% select(-Sample)
+```
+
+```{r}
+# Run RF
+predictors = df_final %>% select(-antidepressant_on_off)
+outcome = df_final %>% pull(antidepressant_on_off) %>% 
+  factor(levels = c('Off','On'))
+
+set.seed(123)
+k = 5
+folds = createFolds(outcome, k = k, list = TRUE)
+tune_grid = expand.grid(mtry = c(5, 10, 15), 
+                       splitrule = "gini",
+                       min.node.size = c(5, 10, 20))
+
+source('randomforest_functions.R')
+pd_model = run_rf(X = predictors, y = outcome, 
+                  fold_list = folds,
+                  hyper = tune_grid, 
+                  rngseed = 123)
+
+# Generate ROC
+roc_test = roc(pd_model$test_labels$true_labels,
+               pd_model$test_labels$predicted_probabilities)
+roc_train = roc(pd_model$train_labels$true_labels,
+                pd_model$train_labels$predicted_probabilities)
+
+p = ggplot() +
+  geom_line(aes(x = 1 - roc_train$specificities, 
+                y = roc_train$sensitivities), 
+            color = "red",size=1) +
+  geom_line(aes(x = 1 - roc_test$specificities,
+                y = roc_test$sensitivities), 
+            color = "black",size=1) +
+  geom_abline(slope = 1, intercept = 0, color = "gray", linetype = "dashed",size=1) +
+  labs(x = "False Positive Rate", y = "True Positive Rate") +
+  annotate("text", x = 0.7, y = 0.2, 
+           label = sprintf("Train (red): %.2f (%.2f-%.2f)\nTest (black): %.2f (%.2f-%.2f)",
+           auc(roc_train), pd_model$auc_train_ci[1], pd_model$auc_train_ci[2],
+           auc(roc_test), pd_model$auc_test_ci[1], pd_model$auc_test_ci[2]), 
+           size = 6) +
+  theme_minimal(base_size=18)
+p
+
+ggsave("random_forest.png", plot = p)
+```
