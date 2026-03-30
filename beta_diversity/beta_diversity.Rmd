@@ -16,7 +16,7 @@ library(ANCOMBC)
 ```
 
 ```{r}
-# Load in data
+# Load in data (not used)
 # metadata = read.delim('../project_analyses/depression_metadata_full.txt', row.names = 1)
 # 
 # metadata$antidepressant_on_off = as.factor(metadata$antidepressant_on_off)

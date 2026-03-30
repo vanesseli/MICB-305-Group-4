@@ -25,7 +25,7 @@ library(ANCOMBC)
 ```
 
 ```{r}
-# Make phyloseq object
+# Get phyloseq object
 ps = readRDS("../project_analyses/my_phyloseq_object.rds") %>% 
   tax_glom('Genus')
 
