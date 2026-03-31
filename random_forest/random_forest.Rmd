@@ -29,23 +29,24 @@ library(ANCOMBC)
 ps = readRDS("../project_analyses/my_phyloseq_object.rds") %>% 
   tax_glom('Genus')
 
+# differential abundance
 stat_table = read.csv("../project_analyses/stat_table.csv", row.names=1) %>%
   filter(diff_antidepressant_on_offOn == "TRUE")
 
 # indicator species
-stat_table = read.csv("../indval_table.csv", row.names = 1)
+stat_table = read.csv("../indval_table.csv")
 ```
 
 ```{r}
 # CLR transformation
-taxa = stat_table$taxon
+taxa = stat_table$Taxon
 
 ps_clr = ps %>% microbiome::transform('clr')
 ```
 
 ```{r}
 # Filter the taxa to include only the 10 most abundant genera
-ps_filt = prune_taxa(taxa,ps_clr)
+ps_filt = prune_taxa(taxa, ps_clr)
 
 df = psmelt(ps_filt) %>%
   mutate(Sample = str_replace_all(Sample,'-','_'))
@@ -68,6 +69,7 @@ df_final = df_noNA %>% select(-Sample)
 
 ```{r}
 # Run RF
+set.seed(123)
 predictors = df_final %>%
   select(-antidepressant_on_off)
 outcome = df_final %>% pull(antidepressant_on_off) %>%

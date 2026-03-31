@@ -5,7 +5,7 @@ library(indicspecies)
 
 set.seed(400)
 
-ps = readRDS("../project_analyses/my_phyloseq_object.rds") %>%
+ps = readRDS("project_analyses/my_phyloseq_object.rds") %>%
   tax_glom(ps,'Genus')
 ps_relab = transform(ps, 'compositional')
 ps_filt = filter_taxa(ps_relab, function(x) mean(x) > 0.001, TRUE)
