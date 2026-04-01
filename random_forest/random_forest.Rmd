@@ -34,12 +34,12 @@ stat_table = read.csv("../project_analyses/stat_table.csv", row.names=1) %>%
   filter(diff_antidepressant_on_offOn == "TRUE")
 
 # indicator species
-stat_table = read.csv("../indval_table.csv")
+# stat_table = read.csv("../indval_table.csv")
 ```
 
 ```{r}
 # CLR transformation
-taxa = stat_table$Taxon
+taxa = stat_table$taxon
 
 ps_clr = ps %>% microbiome::transform('clr')
 ```
@@ -93,23 +93,23 @@ roc_test = roc(pd_model$test_labels$true_labels,
                pd_model$test_labels$predicted_probabilities)
 roc_train = roc(pd_model$train_labels$true_labels,
                 pd_model$train_labels$predicted_probabilities)
-
+# "Off" = "#4876FF","On"  = "#FF82AB"
 p = ggplot() +
   geom_line(aes(x = 1 - roc_train$specificities, 
                 y = roc_train$sensitivities), 
-            color = "red",size=1) +
+            color = "#4876FF",size=1) +
   geom_line(aes(x = 1 - roc_test$specificities,
                 y = roc_test$sensitivities), 
-            color = "black",size=1) +
+            color = "#FF82AB",size=1) +
   geom_abline(slope = 1, intercept = 0, color = "gray", linetype = "dashed",size=1) +
   labs(x = "False Positive Rate", y = "True Positive Rate") +
-  annotate("text", x = 0.7, y = 0.2, 
-           label = sprintf("Train (red): %.2f (%.2f-%.2f)\nTest (black): %.2f (%.2f-%.2f)",
+  annotate("text", x = 0.75, y = 0.2, 
+           label = sprintf("Train (blue): %.2f (%.2f-%.2f)\nTest (pink): %.2f (%.2f-%.2f)",
            auc(roc_train), pd_model$auc_train_ci[1], pd_model$auc_train_ci[2],
            auc(roc_test), pd_model$auc_test_ci[1], pd_model$auc_test_ci[2]), 
            size = 6) +
-  theme_minimal(base_size=18)
+  theme_minimal(base_size=20)
 p
 
-ggsave("random_forest_indicator_species.png", plot = p, width = 8, height = 6)
+ggsave("random_forest.png", plot = p, width = 8, height = 6)
 ```

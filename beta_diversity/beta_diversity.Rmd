@@ -62,6 +62,8 @@ ps = readRDS("../project_analyses/my_phyloseq_object.rds")
 set.seed(123)
 psrare = ps %>%
   rarefy_even_depth(sample.size = 10000, rngseed = 123)
+
+  # subset_samples(Experiment != "ERR4254382")
 ```
 
 ```{r}
@@ -79,9 +81,6 @@ mds = metaMDS(ps_wunifrac)
 mds_data = mds$points %>% as.data.frame %>%
   merge(sample_data(psrare), by='row.names', sort=F)
 
-mds_data = mds_data %>%
-  filter(Row.names != "ERR4254382")
-
 # Plot it
 p_wunifrac = mds_data %>%
   ggplot(aes(MDS1,MDS2,color = antidepressant_on_off)) +
@@ -90,8 +89,10 @@ p_wunifrac = mds_data %>%
   theme_classic(base_size = 18) +
   scale_color_manual(
     name = "Antidepressant Use",
-    values = c("Off" = "#6633FF", "On" = "#00FFCC"),
-    labels = c("off" = "Off", "on" = "On"))
+    values = c("Off" = "#4876FF", "On" = "#FF82AB"),
+    labels = c("off" = "Off", "on" = "On")) +
+  labs(title = "Weighted Unifrac") +
+  theme(plot.title = element_text(hjust = 0.5))
 p_wunifrac
 
 ggsave("beta_diversity_plots/bdiv_wunifrac_plot.png", plot = p_wunifrac)
@@ -131,12 +132,13 @@ p_bray = mds_data %>%
   theme_classic(base_size = 18) +
   scale_color_manual(
     name = "Antidepressant Use",
-    values = c("Off" = "#6633FF", "On" = "#00FFCC"),
-    labels = c("off" = "Off", "on" = "On"))
+    values = c("Off" = "#4876FF", "On" = "#FF82AB"),
+    labels = c("off" = "Off", "on" = "On")) +
+  labs(title = "Bray-Curtis") +
+  theme(plot.title = element_text(hjust = 0.5))
 p_bray
 
-ggsave("beta_diversity_plots/bdiv_bray_plot.png", plot = p_bray,
-       width = 8, height = 6)
+ggsave("beta_diversity_plots/bdiv_bray_plot.png", plot = p_bray)
 
 metadata2 = sample_data(psrare) %>% data.frame()
 
@@ -170,7 +172,7 @@ p_jaccard = mds_data %>%
   theme_classic(base_size = 18) +
   scale_color_manual(
     name = "Antidepressant Use",
-    values = c("Off" = "#6633FF", "On" = "#00FFCC"),
+    values = c("Off" = "#4876FF", "On" = "#FF82AB"),
     labels = c("off" = "Off", "on" = "On"))
 p_jaccard
 
@@ -208,8 +210,10 @@ p_unifrac = mds_data %>%
   theme_classic(base_size = 18) +
   scale_color_manual(
     name = "Antidepressant Use",
-    values = c("Off" = "#6633FF", "On" = "#00FFCC"),
-    labels = c("off" = "Off", "on" = "On"))
+    values = c("Off" = "#4876FF", "On" = "#FF82AB"),
+    labels = c("off" = "Off", "on" = "On")) +
+  labs(title = "Unweighted Unifrac") +
+  theme(plot.title = element_text(hjust = 0.5))
 p_unifrac
 
 ggsave("beta_diversity_plots/bdiv_unifrac_plot.png", plot = p_unifrac)
