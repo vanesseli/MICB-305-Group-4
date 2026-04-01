@@ -95,7 +95,8 @@ p_wunifrac = mds_data %>%
   theme(plot.title = element_text(hjust = 0.5))
 p_wunifrac
 
-ggsave("beta_diversity_plots/bdiv_wunifrac_plot.png", plot = p_wunifrac)
+ggsave("beta_diversity_plots/bdiv_wunifrac_plot.png", plot = p_wunifrac,
+       width = 9, height = 6)
 ```
 
 ```{r}
