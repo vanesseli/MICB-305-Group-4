@@ -8,36 +8,33 @@ library(indicspecies)
 library(writexl)
 library(ANCOMBC)
 library(readxl)
+library(ggsignif)
+library(ggpubr)
 
 # loading and tidying dataset
-metadata = read.delim('depression_metadata_full.txt', row.names=1)  
+metadata = read.csv('filtering/metadata_filtered.csv')  
 
 metadata$antidepressant_on_off = as.factor(metadata$antidepressant_on_off)
 
-metadata_clean <- metadata %>%
-  select(antidepressant_on_off, antidepressant_count, bdi_group, bdi_ii, hiv_status_clean, hcv) %>%
-  drop_na(antidepressant_on_off, antidepressant_count, bdi_group, bdi_ii, hiv_status_clean, hcv) %>%
-  filter(hcv == "NO")|>
-  filter(hiv_status_clean == "HIV+") %>%
-  filter(bdi_group != 'minimal')
-
-data = metadata_clean %>% 
+metadata = metadata %>% 
   mutate(antidepressant_on_off = recode(antidepressant_on_off, 
                                         "0" = "Off",
                                         "1" = "On")) %>% 
   filter(!is.na(antidepressant_on_off))
 
-hiv_depressed_antidepressant <- data  %>% 
+hiv_depressed_antidepressant <- metadata  %>% 
   filter(antidepressant_on_off == 'On')
-#78 people in total
+#38 people in total
 
-hiv_depressed_no_anti <- data %>% 
+hiv_depressed_no_anti <- metadata %>% 
   filter(antidepressant_on_off == 'Off')
-#51 people in total
+#23 people in total
 
 # loading and tidying taxonomy and counts
 # Taxonomy #
-taxonomy = read.delim('taxonomy.tsv', row.names = 1) 
+taxonomy = read.delim('project_analyses/taxonomy.tsv', row.names = 1) 
+metadata <- as.data.frame(metadata)
+rownames(metadata) <- metadata$sample_id
 
 taxonomy_formatted = taxonomy %>% 
   separate(col = Taxon,
@@ -47,24 +44,28 @@ taxonomy_formatted = taxonomy %>%
   select(-Confidence) %>% 
   as.matrix()
 # Count #
-counts = read.delim('feature-table.txt', skip=1, row.names=1) 
+counts = read.delim('project_analyses/feature-table.txt', skip=1, row.names=1) 
 
 counts_formatted = counts %>% 
   as.matrix()
 
 # Figure Generation
-ps <- phyloseq(sample_data(data),
-               otu_table(counts_formatted, taxa_are_rows = T),
-               tax_table(taxonomy_formatted))
+#ps <- phyloseq(sample_data(data),
+#               otu_table(counts_formatted, taxa_are_rows = T),
+#               tax_table(taxonomy_formatted))
 
-hist(sample_sums(ps))
+#hist(sample_sums(ps))
+ps = readRDS("project_analyses/my_phyloseq_object.rds")
 rarecurve(t(data.frame(ps@otu_table)),
           step=1000, 
           label = FALSE)
 
+
+
 psrare = ps %>% 
   rarefy_even_depth(sample.size = 20000, rngseed = 316)
 table(sample_sums(psrare))
+#29 samples removed
 
 set.seed(315)
 
@@ -72,6 +73,7 @@ p = plot_richness(psrare, x = "antidepressant_on_off",
                   measures = c("Observed", "Shannon", "Chao1", "Simpson"),
                   color = "antidepressant_on_off")
 p
+ggsave("alpha_figure/plot_richness.png", plot = p)
 
 pdata = p$data
 str(pdata)
@@ -91,11 +93,11 @@ p_formatted = pdata %>%
 p_formatted
 
 set.seed(316) 
-comparisons = list(c("Off", "On"))
+comparisons = list(c("off", "on"))
 final_figure = p_formatted + 
   stat_compare_means(comparisons = comparisons,
                      method = "wilcox.test",
-                     size = 4) + 
-  scale_y_continuous(expand = expansion(mult = c(0, 0.1)))
+                     size = 4) +  scale_y_continuous(expand = expansion(mult = c(0, 0.1)))+ scale_fill_manual(values = c("off" = "#4876FF","on"  = "#FF82AB" )) 
+
 final_figure
-ggsave("alpha_diversity.png", plot = final_figure)
+ggsave("alpha_figure/alpha_diversity.png", plot = final_figure)
