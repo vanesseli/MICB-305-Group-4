@@ -4,19 +4,22 @@ library(tidyverse)
 library(ANCOMBC)
 library(phyloseq)
 library(BiocManager)
+library(readxl)
 
 #Loading in the stuff
 set.seed(123)
-metadata <- read.csv("metadata_filtered.csv", row.names = 1)
+metadata <- read_excel("../filtering/depression_metadata_manuscript.xlsx")
+metadata <- as.data.frame(metadata)
+rownames(metadata) <- metadata$sample_id
 metadata <- metadata |> 
-  drop_na(antidepressant_on_off, antidepressant_count, 
+  drop_na(antidepressant_on_off, antidepressant_count...5, 
           bdi_group, bdi_ii, hiv_status_clean, hcv) |>
   mutate(antidepressant_on_off = recode(antidepressant_on_off,
                                         `0` = "off", `1` = "on")) |>
   filter(hcv == "NO") |>
   filter(bdi_group != 'minimal') |>
   filter(hiv_status_clean == "HIV+") |>
-  filter(Assay.Type == "AMPLICON")
+  filter(assay_type == "AMPLICON")
 
 metadata$antidepressant_on_off <- as.factor(metadata$antidepressant_on_off)
 
