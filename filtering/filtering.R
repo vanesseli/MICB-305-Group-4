@@ -57,6 +57,12 @@ metadata_clean_small <- metadata_clean_small|>
   filter(antidepressant_on_off != "NA")
 #359
 
+metadata_clean_small_1 <- metadata_clean_small|>
+  filter(hcv == "NO")|>
+  filter(hiv_status_clean=="HIV+")|>
+  filter(bdi_group!="minimal")|>
+  filter(antidepressant_on_off == "On")
+
 #people with HIV, no HCV, depressed, use antidepressants
 hiv_depressed_antidepressant <- metadata_clean_small|>
   filter(hiv_status_clean == 'HIV+')|>
