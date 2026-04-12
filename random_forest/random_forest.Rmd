@@ -63,7 +63,8 @@ df_pivot = df_transformed %>%
   select(Sample,Genus,Abundance,antidepressant_on_off) %>% 
   pivot_wider(names_from = Genus, values_from = Abundance,
               values_fn = mean)
-df_noNA = df_pivot %>% na.omit()
+df_noNA = df_pivot %>% na.omit() %>%
+  filter(antidepressant_on_off != "NA")
 df_final = df_noNA %>% select(-Sample)
 ```
 
@@ -73,7 +74,7 @@ set.seed(123)
 predictors = df_final %>%
   select(-antidepressant_on_off)
 outcome = df_final %>% pull(antidepressant_on_off) %>%
-  factor(levels = c('Off','On'))
+  factor(levels = c('off','on'))
 
 set.seed(123)
 k = 5
