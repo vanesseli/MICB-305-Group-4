@@ -51,8 +51,6 @@ metadata <- metadata |>
   filter(antidepressant_on_off != "NA")
 #359
 
-write.csv(metadata, "filtering/metadata_filtered.csv")
-
 #people with HIV, no HCV, depressed, use antidepressants
 hiv_depressed_antidepressant <- metadata|>
   filter(hiv_status_clean == 'HIV+')|>
@@ -75,3 +73,5 @@ total_people <- metadata|>
   filter(hcv == 'NO')|>
   filter(bdi_group != 'minimal')
 #61 people in total
+
+write.csv(total_people, "filtering/metadata_filtered.csv")
