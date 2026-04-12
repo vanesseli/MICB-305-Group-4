@@ -173,7 +173,9 @@ p_jaccard = mds_data %>%
   scale_color_manual(
     name = "Antidepressant Use",
     values = c("off" = "#4876FF", "on" = "#FF82AB"),
-    labels = c("off" = "Off", "on" = "On"))
+    labels = c("off" = "Off", "on" = "On")) +
+  labs(title = "Jaccard") +
+  theme(plot.title = element_text(hjust = 0.5))
 p_jaccard
 
 ggsave("beta_diversity_plots/bdiv_jaccard_plot.png", plot = p_jaccard)
