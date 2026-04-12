@@ -10,7 +10,7 @@ library(ANCOMBC)
 library(dplyr)
 
 #loading the data
-metadata_edited = read_excel('depression_metadata_manuscript.xlsx')
+metadata_edited = read_excel('filtering/depression_metadata_manuscript.xlsx')
 #572
 
 metadata_clean_edited <- metadata_edited |>
@@ -26,8 +26,9 @@ metadata_clean_edited <- metadata_clean_edited|>
 
 #control for substance use (paper did)
 metadata_clean_edited <- metadata_clean_edited|>  
-  filter(str_detect(current_any_substance_dx, "YES", negate = TRUE))
-#532 samples
+  filter(current_any_substance_dx == "NO")
+
+#427 samples
 
 #checking for duplicates (all of them should say false)
 any(duplicated(metadata_clean_edited$name_sample))
@@ -41,20 +42,20 @@ any(duplicated(metadata_clean_edited$host_subject_id))
 
 #only select the columns I care about since the dataset is so wide
 metadata_clean_small <- metadata_clean_edited |>
-  select(hiv_status_clean, antidepressant_on_off, hcv, bdi_group, host_subject_id)
-#532
+  select(hiv_status_clean, antidepressant_on_off, hcv, bdi_group, host_subject_id, current_any_substance_dx)
+#427
 
 sum(metadata_clean_small$bdi_group == "NA")
-#151 samples have NA for bdi group
+#63 samples have NA for bdi group
 
 metadata_clean_small <- metadata_clean_small|>
   filter(bdi_group != "NA")
-#381
+#364
 
 #want to see how many NAs there are for antidepressant column (6)
 metadata_clean_small <- metadata_clean_small|>
   filter(antidepressant_on_off != "NA")
-#375
+#359
 
 #people with HIV, no HCV, depressed, use antidepressants
 hiv_depressed_antidepressant <- metadata_clean_small|>
@@ -62,7 +63,7 @@ hiv_depressed_antidepressant <- metadata_clean_small|>
   filter(hcv == 'NO')|>
   filter(bdi_group != 'minimal')|>
   filter(antidepressant_on_off == "On")
-#39 people
+#38 people
 
 #people with HIV, no HCV, depressed, no antidepressants
 hiv_depressed_no_anti <- metadata_clean_small|>
@@ -70,11 +71,11 @@ hiv_depressed_no_anti <- metadata_clean_small|>
   filter(hcv == 'NO')|>
   filter(bdi_group != 'minimal')|>
   filter(antidepressant_on_off == "Off")
-#24 people in total
+#23 people in total
 
 #total number of people who has HIV and depression (and no HCV)
 total_people <- metadata_clean_small|>
   filter(hiv_status_clean == 'HIV+')|>
   filter(hcv == 'NO')|>
   filter(bdi_group != 'minimal')
-#63 people in total
+#61 people in total
