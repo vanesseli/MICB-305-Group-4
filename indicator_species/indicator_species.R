@@ -8,6 +8,7 @@ library(indicspecies)
 library(writexl)
 library(ANCOMBC)
 library(dplyr)
+library(readr)
 
 #loading data
 metadata = read.csv('filtering/metadata_filtered.csv')
@@ -31,8 +32,6 @@ indval = multipatt(t(otu_table), cluster = ps_filt@sam_data$antidepressant_on_of
 summary(indval, indvalcomp = TRUE)
 indval_table= as.data.frame(indval$sign)
 
-View(indval_table)
-
 #matching actual names to the codes
 # extract the taxonomy table as a data frame
 tax_info <- as.data.frame(tax_table(ps_filt))
@@ -42,6 +41,11 @@ indval_table$Genus <- tax_info[rownames(indval_table), "Genus"]
 
 # move Genus to the first column so i can read
 indval_table <- indval_table[, c("Genus", setdiff(names(indval_table), "Genus"))]
+
+View(indval_table)
+write_csv(indval_table, "indicator_species/indval_table.csv")
+
+
 
 #what are the taxonomic ranks of CAG 
 tax_table(ps)[grep("CAG-873", tax_table(ps)[, "Genus"]), ]
