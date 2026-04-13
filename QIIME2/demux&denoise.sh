@@ -11,7 +11,7 @@ qiime tools import \
   --input-path /datasets/project_2/depression/depression_manifest.tsv \
   --output-path ./demux_seqs.qza
  
-#converting demultiplexed file to visualization format
+# converting demultiplexed file to visualization format
 qiime demux summarize \
   --i-data demux_seqs.qza \
   --o-visualization demux.qzv
@@ -20,7 +20,9 @@ qiime demux summarize \
 # cd: local computer (Desktop/MICB_305/Group_Project)
 scp root@10.34.36.91:/work/manuscript/demux.qzv .
 
-#denoising
+# denoising
+# deterine ASVs
+# cd: remote server (/work/manuscript)
 qiime dada2 denoise-single \
   --i-demultiplexed-seqs demux_seqs.qza \
   --p-trim-left 0 \
@@ -28,3 +30,17 @@ qiime dada2 denoise-single \
   --o-representative-sequences rep-seqs.qza \
   --o-table table.qza \
   --o-denoising-stats stats.qza
+
+# visualize DADA2 outputs 
+qiime metadata tabulate \
+  --m-input-file stats.qza \
+  --o-visualization stats.qzv
+
+qiime feature-table summarize \
+  --i-table table.qza \
+  --o-visualization table.qzv \
+  --m-sample-metadata-file metadata_filtered.tsv
+
+qiime feature-table tabulate-seqs \
+  --i-data rep-seqs.qza \
+  --o-visualization rep-seqs.qzv
