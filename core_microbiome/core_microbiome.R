@@ -41,4 +41,4 @@ venn <- ggVennDiagram(
 ) +
   scale_fill_gradient(low = "#4876FF", high = "#FF82AB")
 venn                                                                                                                   
-ggsave("indicator_species/core_microbiome_plot_0.5.png", plot = venn, width = 10, height = 10, limitsize = FALSE)
+ggsave("core_microbiome/core_microbiome_plot_0.5.png", plot = venn, width = 10, height = 10, limitsize = FALSE)
