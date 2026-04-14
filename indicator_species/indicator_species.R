@@ -9,6 +9,8 @@ library(writexl)
 library(ANCOMBC)
 library(dplyr)
 library(readr)
+library(scales)
+library(ggplot2)
 
 #loading data
 metadata = read.csv('filtering/metadata_filtered.csv')
@@ -45,8 +47,6 @@ indval_table <- indval_table[, c("Genus", setdiff(names(indval_table), "Genus"))
 View(indval_table)
 write_csv(indval_table, "indicator_species/indval_table.csv")
 
-
-
 #what are the taxonomic ranks of CAG 
 tax_table(ps)[grep("CAG-873", tax_table(ps)[, "Genus"]), ]
 #what are the taxonomic ranks of g__Catenibacterium
@@ -65,7 +65,6 @@ tax_table(ps)[grep("Muribaculaceae", tax_table(ps)[, "Genus"]), ]
 #what are the taxonomic ranks of  g__Geobacillus
 tax_table(ps)[grep("Geobacillus", tax_table(ps)[, "Genus"]), ]
 
-
 #plotting
 phyla_to_plot = indval_table%>%
   filter(s.off ==1 & s.on==0)%>%
@@ -74,17 +73,43 @@ phyla_to_plot = indval_table%>%
 df_of_taxa = prune_taxa(phyla_to_plot, ps_filt)%>%
   psmelt()
 
-library(ggplot2)
+#no psuedo log transform
 plot_filter <- df_of_taxa%>%
   ggplot(aes(antidepressant_on_off, Abundance, fill=antidepressant_on_off))+
   geom_boxplot(outlier.shape = NA) +
   geom_jitter(height=0, width=0.2)+
-  facet_wrap(~Genus, ncol=4, scales = 'free')
+  facet_wrap(~Genus, ncol=4, scales = 'free') +scale_y_continuous()+ 
+  scale_fill_manual(values = c("off" = "#4876FF","on"  = "#FF82AB" )) 
+plot_filter
 
-library(scales)
-indicator_species_plot <- plot_filter +
-  scale_y_continuous(trans = pseudo_log_trans())+ scale_fill_manual(values = c("off" = "#4876FF","on"  = "#FF82AB" )) 
+ggsave("indicator_species/indicator_species_notransform.png", plot = plot_filter, width = 10, height = 10, limitsize = FALSE)
 
-indicator_species_plot
+#log transformation (ignored 0)
+df_of_taxa_log <- df_of_taxa %>%
+  mutate(abundance_log = log10(Abundance))
 
-ggsave("indicator_species/indicator_species.png", plot = indicator_species_plot, width = 10, height = 10, limitsize = FALSE)
+plot_log <- df_of_taxa_log%>%
+  ggplot(aes(antidepressant_on_off, abundance_log, fill=antidepressant_on_off))+
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(height=0, width=0.2)+
+  facet_wrap(~Genus, ncol=4,scales = 'free') + 
+  scale_fill_manual(values = c("off" = "#4876FF","on"  = "#FF82AB" ))
+
+plot_log
+ggsave("indicator_species/indicator_species_log10.png", plot = plot_log, width = 10, height = 10, limitsize = FALSE)
+
+#removed 486 rows containing non-finite outside the scale range ('stat_boxplot()')
+
+###########trial with pseudocount
+df_of_taxa_pseudo <- df_of_taxa %>%
+  mutate(abundance_pseudo = log10(Abundance + 1e-4))
+
+plot_pseudocount <- ggplot(df_of_taxa_pseudo, aes(antidepressant_on_off, abundance_pseudo, fill = antidepressant_on_off)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(height = 0, width = 0.2) +
+  facet_wrap(~Genus, ncol = 4, scales = "free_y") +
+  scale_fill_manual(values = c("off" = "#4876FF", "on" = "#FF82AB")) +
+  ylab("log10(Abundance + 1e-4)")
+
+plot_pseudocount
+ggsave("indicator_species/indicator_species_pseudocount.png", plot = plot_pseudocount, width = 10, height = 10, limitsize = FALSE)
