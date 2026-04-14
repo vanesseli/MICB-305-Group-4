@@ -28,8 +28,8 @@ off_anti = subset_samples(ps, metadata$antidepressant_on_off == 'Off')
 
 #_rare_relab_genus
 #core members
-core_on_anti = core_members(on_anti, detection = 0.005, prevalence = 0.3)
-core_off_anti = core_members(off_anti, detection = 0.005, prevalence = 0.3)
+core_on_anti = core_members(on_anti, detection = 0.005, prevalence = 0.5)
+core_off_anti = core_members(off_anti, detection = 0.005, prevalence = 0.5)
 
 library(ggVennDiagram)
 
@@ -41,4 +41,4 @@ venn <- ggVennDiagram(
 ) +
   scale_fill_gradient(low = "#4876FF", high = "#FF82AB")
 venn                                                                                                                   
-ggsave("indicator_species/core_microbiome_plot.png", plot = venn, width = 10, height = 10, limitsize = FALSE)
+ggsave("indicator_species/core_microbiome_plot_0.5.png", plot = venn, width = 10, height = 10, limitsize = FALSE)
