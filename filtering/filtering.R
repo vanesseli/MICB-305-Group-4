@@ -1,12 +1,6 @@
 library(tidyverse)
-library(phyloseq)
 library(readxl)
-library(vegan)
-library(ggpubr)
-library(microbiome)
-library(indicspecies)
 library(writexl)
-library(ANCOMBC)
 library(dplyr)
 
 #loading the data
@@ -50,6 +44,7 @@ metadata <- metadata|>
 metadata <- metadata |>
   filter(antidepressant_on_off != "NA")
 #359
+View(metadata)
 
 #people with HIV, no HCV, depressed, use antidepressants
 hiv_depressed_antidepressant <- metadata|>
