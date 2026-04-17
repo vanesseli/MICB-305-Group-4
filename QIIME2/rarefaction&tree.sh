@@ -1,4 +1,5 @@
 ## RAREFACTION ##
+# cd: remote server (/work/assignment_1)
 qiime taxa filter-table \
   --i-table table.qza \
   --i-taxonomy taxonomy.qza \
@@ -8,7 +9,11 @@ qiime taxa filter-table \
 qiime feature-table summarize \
   --i-table table-no-mitochondria-no-chloroplast.qza \
   --o-visualization table-no-mitochondria-no-chloroplast.qzv \
-  --m-sample-metadata-file metadata_filtered.csv
+  --m-sample-metadata-file depression_metadata_full.txt*** * FILE PATH?
+
+# Visualization
+# cd: local computer (/Desktop/MICB_305/Group_Project)
+scp root@10.34.36.91:/work/assignment_1/alpha-rarefaction.qzv .
 
 # Generate a tree for phylogenetic diversity analyses
 qiime phylogeny align-to-tree-mafft-fasttree \
