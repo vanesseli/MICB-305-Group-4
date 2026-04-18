@@ -36,7 +36,7 @@ qiime metadata tabulate \
 qiime feature-table summarize \
   --i-table table.qza \
   --o-visualization table.qzv \
-  --m-sample-metadata-file /datasets/project_2/depression/depression_metadata_full.txt****
+  --m-sample-metadata-file depression_metadata_full.txt
 
 qiime feature-table tabulate-seqs \
   --i-data rep-seqs.qza \
