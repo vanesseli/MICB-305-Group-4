@@ -9,7 +9,7 @@ qiime taxa filter-table \
 qiime feature-table summarize \
   --i-table table-no-mitochondria-no-chloroplast.qza \
   --o-visualization table-no-mitochondria-no-chloroplast.qzv \
-  --m-sample-metadata-file /datasets/project_2/depressio/depression_metadata.txt
+  --m-sample-metadata-file depression_metadata_full.txt
 
 # Visualization
 # cd: local computer (/Desktop/MICB_305/Group_Project)
