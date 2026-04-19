@@ -1,0 +1,289 @@
+---
+html_document: default
+pdf_document: default
+title: "Module 15 - ggpicrust2"
+---
+
+**Key Information**
+
+Dataset: Depression Metadata
+
+Groups of interest: If the HIV+ patients takes antidepressant or not (0 is no, \>= 1 is yes)
+
+Filter: - I will subset for only HIV+ patients - I will also convert the number of antidepressant use (antidepressant_count) to antidepressant and no antidepressant
+
+------------------------------------------------------------------------
+
+**Code**
+
+*Loading data and Libraries*
+
+```{r Load data and libraries}
+# install.packages("devtools")
+# devtools::install_github("cafferychen777/ggpicrust2")
+# install.packages('MicrobiomeStat')
+# BiocManager::install("KEGGREST")
+# install.packages("GGally")
+
+# library("devtools") 
+# install_github("biobakery/maaslin2")
+
+library(MicrobiomeStat)
+library(tidyverse)
+library(phyloseq)
+library(ggpicrust2)
+library(pheatmap)
+library(dplyr)
+library(readxl)
+```
+
+*Code Cleaning #2*
+```{r Variable filter}
+
+#loading the data
+metadata_edited = read_excel('../Datasets/depression_metadata_manuscript.xlsx')
+#572
+
+metadata = read.csv("../Datasets/depression_metadata_full.csv")
+
+nrow(metadata)
+
+getwd()
+metadata_clean_edited <- metadata_edited |>
+  filter(str_detect(library_name, "blank", negate = TRUE))|>
+  filter(!is.na(library_name))
+
+metadata_clean_edited <- metadata_clean_edited %>%
+  mutate(antidepressant_on_off = recode(as.character(antidepressant_on_off), "0" = "Off","1" = "On")) 
+
+metadata_clean_edited <- metadata_clean_edited|>
+  filter(str_detect(name_sample, "blank", negate = TRUE))|>
+  filter(!is.na(name_sample))
+
+#control for substance use (paper did)
+metadata_clean_edited <- metadata_clean_edited|>  
+  filter(str_detect(current_any_substance_dx, "YES", negate = TRUE))
+#532 samples
+
+#checking for duplicates (all of them should say false)
+any(duplicated(metadata_clean_edited$name_sample))
+any(duplicated(metadata_clean_edited$sample_name))
+any(duplicated(metadata_clean_edited$BioSample))
+any(duplicated(metadata_clean_edited$Sample_name))
+any(duplicated(metadata_clean_edited$host_subject_id))
+
+
+
+#if one of them return with ‘TRUE’, check which samples were duplicated with this code
+#metadata_clean_edited$host_subject_id[duplicated(metadata_clean_edited$host_subject_id)]
+
+#only select the columns I care about since the dataset is so wide
+metadata_clean_small <- metadata_clean_edited |>
+  select(sample_id,hiv_status_clean, antidepressant_on_off, hcv, bdi_group, host_subject_id)
+#532
+
+#want to see how many NAs there are for BDI group
+sum(metadata_clean_small$bdi_group == "NA")
+#151 samples have NA for bdi group
+
+metadata_clean_small <- metadata_clean_small|>
+  filter(bdi_group != "NA")
+#381
+
+#want to see how many NAs there are for antidepressant column (6)
+metadata_clean_small <- metadata_clean_small|>
+  filter(antidepressant_on_off != "NA")
+#375
+
+#other relevant columns don’t have NAs
+
+##subsetting
+#people with HIV, no HCV, depressed, use antidepressants
+hiv_depressed_antidepressant <- metadata_clean_small|>
+  filter(hiv_status_clean == 'HIV+')|>
+  filter(hcv == 'NO')|>
+  filter(bdi_group != 'minimal')|>
+  filter(antidepressant_on_off == "On")
+#39 people
+
+#people with HIV, no HCV, depressed, no antidepressants
+hiv_depressed_no_anti <- metadata_clean_small|>
+  filter(hiv_status_clean == 'HIV+')|>
+  filter(hcv == 'NO')|>
+  filter(bdi_group != 'minimal')|>
+  filter(antidepressant_on_off == "Off")
+#24 people in total
+
+View(metadata_clean_edited)
+#total number of people who has HIV and depression (and no HCV)
+total_people <- metadata_clean_small|>
+  filter(hiv_status_clean == 'HIV+')|>
+  filter(hcv == 'NO')|>
+  filter(bdi_group != 'minimal')
+#63 people in total
+
+
+
+ # Pathways and samples are wrangled so that they are rows and columns
+mc = read.delim('../Datasets/path_abun_unstrat.tsv.gz',row.names = 1)
+
+
+
+```
+
+
+*Differential Analysis*
+
+```{r Differential analysis}
+
+
+meta_clean_2 <- metadata_clean_small %>%
+  filter(sample_id %in% colnames(mc)) %>%
+  filter(!is.na(antidepressant_on_off))
+
+# Realign mc_filt to match metadata
+mc_filt <- mc %>%
+          select(all_of(meta_clean_2$sample_id))
+
+
+# Perform pathway differential abundance analysis (DAA) using Maaslin2
+
+daa_results_df = pathway_daa(abundance = mc_filt,
+                             metadata = meta_clean_2, 
+                             group = "antidepressant_on_off", 
+                             daa_method = "Maaslin2", 
+                             select = NULL, reference = NULL)
+
+# Annotate pathway results 
+
+daa_annotated_results_df = pathway_annotation(pathway = "MetaCyc",   daa_results_df = daa_results_df,
+ko_to_kegg = FALSE)
+
+
+
+#Save the annotated results so it is faster for us to open it in the future 
+saveRDS(daa_annotated_results_df,'../Datasets/daa_annotated_results_df.rds')
+
+
+
+daa_annotated_results_df = readRDS('../Datasets/daa_annotated_results_df.rds')
+
+
+```
+
+
+```{r fixed function}
+source('ggpicrust2_errorbar_function_fixed.R')
+
+# ploting volcano plot
+
+volcano_plot <- ggplot(data = daa_annotated_results_df, 
+                       aes(x = log2_fold_change, y = -log10(p_adjust))) +
+  geom_point() +
+  labs(x = "Log2Fold change",
+       y = "-log10 Adjusted p-values")
+
+ggsave(ggsave(
+  "../Visualization/volcano_plot.png",
+  plot = volcano_plot,
+  width = 8,
+  height = 6
+))
+
+## heatmaps
+
+
+stats = mc_filt %>% 
+  t() %>% 
+  as.data.frame()
+
+top_variance <- apply(mc_filt, 1, var, na.rm = TRUE)
+
+sig_features <- names(sort(top_variance, decreasing = TRUE))[1:20]
+
+stats_final <- stats %>%
+               select(all_of(sig_features)) %>%
+               cor(method = "spearman") 
+color_palette <-
+  colorRampPalette(c("red","white","blue"))(41)   
+
+breaks <- seq(from = -1, to = 1, by = 0.05)
+
+
+heatmap <- pheatmap(stats_final,
+         clustering_distance_rows = "euclidean",
+         clustering_distance_cols = "euclidean",
+         clustering_method = "complete",
+         color = color_palette,
+         main = "", breaks = breaks,
+         fontsize_row =10, fontsize_col = 10,
+         filename ="../Visualization/heatmaps.png",
+         height = 9, width = 9)
+
+ggsave(ggsave(
+  "../Visualization/volcano_plot.png",
+  plot = volcano_plot,
+  width = 6,
+  height = 10
+))
+
+
+# Pathway pca
+
+pathway_pca = pathway_pca(abundance = mc, 
+            metadata  = meta_clean_2, 
+            group = "antidepressant_on_off") + 
+            scale_color_manual(values = c("FF82AB","4876FF"))
+            
+          
+
+scores <-pathway_pca$data
+
+ggsave(ggsave(
+  "../Visualization/pathway_pca.png",
+  plot = pathway_pca,
+  width = 20,
+  height = 6
+))
+
+# plot the error bars 
+
+p_value_check <- daa_annotated_results_df %>%
+                 filter(p_adjust < 0.05) %>%
+                nrow()
+
+
+#There is no significant pathways at p < 0.05, so I just took the top 20 or 30 pathways
+
+top_features <- daa_annotated_results_df %>%
+                arrange(p_adjust) %>%
+                slice(1:30)
+
+
+peb = pathway_errorbar_fixed(
+  abundance = mc_filt, 
+  daa_results_df = top_features, 
+  Group = meta_clean_2$antidepressant_on_off,
+  wrap_label = T, wraplength = 2,
+  p_values_threshold = 1, 
+  order = "group",
+  ko_to_kegg = FALSE, 
+  p_value_bar = TRUE, 
+  x_lab = "description") 
+
+
+peb
+
+#saving the barplot as a png so that we can adjust the width and height
+
+ggsave(
+  "../Visualization/MetaCyc_ErrorBar.pdf",
+  plot = peb,
+  width = 10,
+  height = 6
+)
+```
+
+**Conclusion**
+
+Based only on these results, the groups of interest has a similar bacterial pathways. There were no pathways that remained statistically significant at (p-value = 0.05. I have to adjust the p value = 0.6 to get 16 significant pathways. There is also very small log2fold changes, further proving that the profiles of the gut microbiome is very similar between HIV+ patients that take antidepressants vs do not take antidepresants
