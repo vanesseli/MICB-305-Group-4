@@ -1,7 +1,7 @@
 ---
 html_document: default
 pdf_document: default
-title: "Module 15 - ggpicrust2"
+title: "functional_analysis_with_PICRUst2"
 ---
 
 **Key Information**
