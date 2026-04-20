@@ -1,0 +1,18 @@
+Filtering Methods
+A total of 366 rows were removed because sequencing was performed using whole genome shotgun (WGS) rather than 16S rRNA as indicated under the “Assay Type” column
+An additional 123 rows corresponding to blank samples were excluded based on entries in the host_subject_id or name_sample columns
+To avoid disproportionate effects from participants sampled at multiple timepoints, only the first visit was retained for each individual
+-  In total, 338 samples representing non-first visits were removed
+-    duplicates were identified using host_subject_id
+-    the earliest timepoint was retained based on the Collection_Date column
+-  For 11 duplicates, the collection dates were unavailable
+-    instead, age was used to infer the earliest sample (younger age indicating an earlier timepoint)
+-  In cases where age data were also missing or identical across visits
+-    sample IDs were used as a proxy, as they are typically assigned in chronological order#
+
+Four samples were excluded due to unsuccessful sequencing runs
+  characterized by abnormally short read lengths and the presence of higher-quality duplicates collected on the same day
+
+12 samples with no available metadata (all fields missing/NA) were removed
+
+After these filtering steps, 572 samples remained for downstream analysis
