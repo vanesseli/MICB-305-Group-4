@@ -46,9 +46,6 @@ metadata_edited = read_excel('../Datasets/depression_metadata_manuscript.xlsx')
 
 metadata = read.csv("../Datasets/depression_metadata_full.csv")
 
-nrow(metadata)
-
-getwd()
 metadata_clean_edited <- metadata_edited |>
   filter(str_detect(library_name, "blank", negate = TRUE))|>
   filter(!is.na(library_name))
@@ -283,7 +280,3 @@ ggsave(
   height = 6
 )
 ```
-
-**Conclusion**
-
-Based only on these results, the groups of interest has a similar bacterial pathways. There were no pathways that remained statistically significant at (p-value = 0.05. I have to adjust the p value = 0.6 to get 16 significant pathways. There is also very small log2fold changes, further proving that the profiles of the gut microbiome is very similar between HIV+ patients that take antidepressants vs do not take antidepresants
