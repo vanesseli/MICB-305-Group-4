@@ -21,6 +21,6 @@ qiime feature-classifier classify-sklearn \
   --o-classification taxonomy.qza
 
 # copying visualization file to local computer 
-# cd: local computer (Desktop/MICB_305/Group_Project)
+# cd: local computer 
 scp root@10.34.36.91:/work/manuscript/taxa-bar-plots.qzv .
 scp root@10.34.36.91:/work/manuscript/table.qzv .
