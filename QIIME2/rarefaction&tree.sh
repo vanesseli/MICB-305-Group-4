@@ -12,7 +12,7 @@ qiime feature-table summarize \
   --m-sample-metadata-file depression_metadata_full.txt
 
 # Visualization
-# cd: local computer (/Desktop/MICB_305/Group_Project)
+# cd: local computer
 scp root@10.34.36.91:/work/assignment_1/alpha-rarefaction.qzv .
 
 # Generate a tree for phylogenetic diversity analyses
