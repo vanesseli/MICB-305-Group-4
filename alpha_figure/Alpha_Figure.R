@@ -71,6 +71,7 @@ p = plot_richness(psrare, x = "antidepressant_on_off",
                   measures = c("Observed", "Shannon", "Chao1", "Simpson"),
                   color = "antidepressant_on_off")
 p
+ggsave("plot_richness.png")
 
 pdata = p$data
 str(pdata)
