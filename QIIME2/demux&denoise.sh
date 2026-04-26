@@ -14,7 +14,7 @@ qiime demux summarize \
   --o-visualization demux.qzv
 
 # copying visualization file to local computer 
-# cd: local computer (Desktop/MICB_305/Group_Project)
+# cd: local computer
 scp root@10.34.36.91:/work/assignment_1/demux.qzv .
 
 # denoising
