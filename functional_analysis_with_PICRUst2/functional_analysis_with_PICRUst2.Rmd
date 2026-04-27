@@ -172,7 +172,7 @@ daa_annotated_results_df = readRDS('../Datasets/daa_annotated_results_df.rds')
 ```{r fixed function}
 source('ggpicrust2_errorbar_function_fixed.R')
 
-# ploting volcano plot
+## volcano plot
 
 volcano_plot <- ggplot(data = daa_annotated_results_df, 
                        aes(x = log2_fold_change, y = -log10(p_adjust))) +
@@ -206,7 +206,6 @@ color_palette <-
 
 breaks <- seq(from = -1, to = 1, by = 0.05)
 
-
 heatmap <- pheatmap(stats_final,
          clustering_distance_rows = "euclidean",
          clustering_distance_cols = "euclidean",
@@ -225,7 +224,7 @@ ggsave(ggsave(
 ))
 
 
-# Pathway pca
+## Pathway pca
 
 pathway_pca = pathway_pca(abundance = mc, 
             metadata  = meta_clean_2, 
@@ -243,7 +242,7 @@ ggsave(ggsave(
   height = 6
 ))
 
-# plot the error bars 
+## error bars plot with the abundance
 
 p_value_check <- daa_annotated_results_df %>%
                  filter(p_adjust < 0.05) %>%
@@ -268,8 +267,6 @@ peb = pathway_errorbar_fixed(
   p_value_bar = TRUE, 
   x_lab = "description") 
 
-
-peb
 
 #saving the barplot as a png so that we can adjust the width and height
 
