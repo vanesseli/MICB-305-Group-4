@@ -44,6 +44,9 @@ indval_table$Genus <- tax_info[rownames(indval_table), "Genus"]
 # move Genus to the first column so i can read
 indval_table <- indval_table[, c("Genus", setdiff(names(indval_table), "Genus"))]
 
+
+indval_table <- indval_table|>
+  filter(p.value<0.05)
 View(indval_table)
 write_csv(indval_table, "indicator_species/indval_table.csv")
 
@@ -70,35 +73,10 @@ phyla_to_plot = indval_table%>%
   filter(s.off ==1 & s.on==0)%>%
   rownames()
 
+phyla_to_plot <- phyla_to_plot
+
 df_of_taxa = prune_taxa(phyla_to_plot, ps_filt)%>%
   psmelt()
-
-#no psuedo log transform
-plot_filter <- df_of_taxa%>%
-  ggplot(aes(antidepressant_on_off, Abundance, fill=antidepressant_on_off))+
-  geom_boxplot(outlier.shape = NA) +
-  geom_jitter(height=0, width=0.2)+
-  facet_wrap(~Genus, ncol=4, scales = 'free') +scale_y_continuous()+ 
-  scale_fill_manual(values = c("off" = "#4876FF","on"  = "#FF82AB" )) 
-plot_filter
-
-ggsave("indicator_species/indicator_species_notransform.png", plot = plot_filter, width = 10, height = 10, limitsize = FALSE)
-
-#log transformation (ignored 0)
-df_of_taxa_log <- df_of_taxa %>%
-  mutate(abundance_log = log10(Abundance))
-
-plot_log <- df_of_taxa_log%>%
-  ggplot(aes(antidepressant_on_off, abundance_log, fill=antidepressant_on_off))+
-  geom_boxplot(outlier.shape = NA) +
-  geom_jitter(height=0, width=0.2)+
-  facet_wrap(~Genus, ncol=4,scales = 'free') + 
-  scale_fill_manual(values = c("off" = "#4876FF","on"  = "#FF82AB" ))
-
-plot_log
-ggsave("indicator_species/indicator_species_log10.png", plot = plot_log, width = 10, height = 10, limitsize = FALSE)
-
-#removed 486 rows containing non-finite outside the scale range ('stat_boxplot()')
 
 ###########trial with pseudocount
 df_of_taxa_pseudo <- df_of_taxa %>%
@@ -109,7 +87,8 @@ plot_pseudocount <- ggplot(df_of_taxa_pseudo, aes(antidepressant_on_off, abundan
   geom_jitter(height = 0, width = 0.2) +
   facet_wrap(~Genus, ncol = 4, scales = "free_y") +
   scale_fill_manual(values = c("off" = "#4876FF", "on" = "#FF82AB")) +
-  ylab("log10(Abundance + 1e-4)")
+  ylab("log10(Abundance + 1e-4)")+ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"))
+
 
 plot_pseudocount
-ggsave("indicator_species/indicator_species_pseudocount.png", plot = plot_pseudocount, width = 10, height = 10, limitsize = FALSE)
+ggsave("indicator_species/indicator_species_pseudocount.png", plot = plot_pseudocount, width = 10, height = 5, limitsize = FALSE)
