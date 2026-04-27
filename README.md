@@ -1,12 +1,12 @@
 # MICB-305-Group-4
 General Information
-This repository contains all codes required to run the analyses in the
+This repository contains all codes required to run the analyses described in the "Antidepressant Use Does Not Significantly Influence Gut Microbiome Composition, Diversity, and Predicted Function in Human Immunodeficiency Virus-Positive Individuals with Depression" paper
 
 Team members: Vanesse Li, Esther Xu, Ray Lou, Sarah Lai, Katelyn Wang
 
 ## Research Question: Does antidepressant use lead to additional changes in gut microbiome composition, diversity, and predicted functional pathways in individuals with HIV and major depressive disorder (HIV+MDD+)?
 
-Methods:
+Methods (each analyses is stored in a separated folder):
 - alpha diversity analysis
 - beta diversity analysis
 - indicator species analysis
@@ -15,6 +15,7 @@ Methods:
 - random forest
 
 ### Details on the dataset:
+- all of these files can be found under the 'filtering' folder
 - "depression_metadata_with_rationale" includes the full dataset & rationale on why specific samples were not included (ex: blanks, patient duplicates, errors, etc)
 - "depression_metadata_manuscript" excludes the duplicates and blanks. patient without information on HIV status, HCV status, antidepressant status, and depression status are also not included in here. To get to 'metadata_filtered' (our cohort of interest), please run the 'filtering.R' Rscript
 - "metadata_filtered" contains the actual 61 patient data we are working with
