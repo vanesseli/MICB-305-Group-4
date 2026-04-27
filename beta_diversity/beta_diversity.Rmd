@@ -16,44 +16,6 @@ library(ANCOMBC)
 ```
 
 ```{r}
-# Load in data (not used)
-# metadata = read.delim('../project_analyses/depression_metadata_full.txt', row.names = 1)
-# 
-# metadata$antidepressant_on_off = as.factor(metadata$antidepressant_on_off)
-# metadata <- metadata %>%
-#   select(Assay.Type, antidepressant_on_off, antidepressant_count, bdi_group, bdi_ii,
-#          hiv_status_clean, hcv) %>%
-#   mutate(antidepressant_on_off = recode(antidepressant_on_off,
-#                                         `0` = "Off", `1` = "On")) %>%
-#   filter(!is.na(antidepressant_on_off) & hcv == "NO" &
-#            hiv_status_clean == "HIV+" & bdi_group != "minimal" &
-#            Assay.Type == "AMPLICON")
-# 
-# taxonomy = read.delim('../project_analyses/taxonomy.tsv', row.names = 1)
-# counts = read.delim('../project_analyses/feature-table.txt', skip=1, row.names=1)
-# phylotree = read_tree('../project_analyses/tree.nwk')
-```
-
-```{r}
-# Make phyloseq object
-# set.seed(123)
-# taxonomy_formatted = taxonomy %>% 
-#   separate(col = Taxon, 
-#            into = c('Domain','Phylum','Class','Order',
-#                     'Family','Genus','Species'),
-#            sep=';', fill='right') %>% 
-#   select(-Confidence) %>% 
-#   as.matrix()
-# 
-# counts_formatted = counts %>% as.matrix()
-# 
-# otu_table <- otu_table(counts_formatted, taxa_are_rows = T)
-# 
-# sample_data <- sample_data(metadata)
-# 
-# tax_table <- tax_table(taxonomy_formatted)
-# 
-# ps <- phyloseq(otu_table, sample_data, tax_table, phylotree)
 ps = readRDS("../project_analyses/my_phyloseq_object.rds")
 ```
 
@@ -62,12 +24,10 @@ ps = readRDS("../project_analyses/my_phyloseq_object.rds")
 set.seed(123)
 psrare = ps %>%
   rarefy_even_depth(sample.size = 10000, rngseed = 123)
-
-  # subset_samples(Experiment != "ERR4254382")
 ```
 
 ```{r}
-# Calculate Bray-Curtis distances
+# Calculate Weighted Unifrac
 set.seed(123)
 ps_wunifrac = phyloseq::distance(psrare, method = "wunifrac")
 ```
@@ -115,6 +75,7 @@ stats
 ```
 
 ```{r}
+# Bray-Curtis
 set.seed(123)
 ps_bray = phyloseq::distance(psrare, method = "bray")
 
@@ -155,6 +116,7 @@ stats
 ```
 
 ```{r}
+# Jaccard
 set.seed(123)
 ps_jaccard = phyloseq::distance(psrare, method = "jaccard")
 
@@ -195,6 +157,7 @@ stats
 ```
 
 ```{r}
+# Unweighted Unifrac
 set.seed(123)
 ps_unifrac = phyloseq::distance(psrare, method = "unifrac")
 
