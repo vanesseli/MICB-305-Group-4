@@ -32,9 +32,6 @@ ps = readRDS("../project_analyses/my_phyloseq_object.rds") %>%
 # differential abundance
 stat_table = read.csv("../project_analyses/stat_table.csv", row.names=1) %>%
   filter(diff_antidepressant_on_offOn == "TRUE")
-
-# indicator species
-# stat_table = read.csv("../indval_table.csv")
 ```
 
 ```{r}
@@ -45,7 +42,7 @@ ps_clr = ps %>% microbiome::transform('clr')
 ```
 
 ```{r}
-# Filter the taxa to include only the 10 most abundant genera
+# Filter the taxa from ANCOM-BC2
 ps_filt = prune_taxa(taxa, ps_clr)
 
 df = psmelt(ps_filt) %>%
