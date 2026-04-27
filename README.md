@@ -13,6 +13,7 @@ Methods (each analyses is stored in a separated folder):
 - differential abundance analysis
 - PICRUSt2 predictive functional analysis
 - random forest
+- core microbiome (we ran this analysis but didn't include it in our manuscript)
 
 ### Details on the dataset:
 - all of these files can be found under the 'filtering' folder
